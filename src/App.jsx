@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-// --- ESTILOS GLOBAIS & ANIMAÇÕES ---
+// --- ESTILOS GLOBAIS ---
 const globalStyles = `
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Noto+Sans+JP:wght@100;400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap');
@@ -15,24 +15,24 @@ const globalStyles = `
   --white: #ffffff;
   --text-primary: #722F37;
   --terminal-bg: #0d0d0d;
-  --terminal-accent: #00ff41;
+  --terminal-accent: #00ff41; /* Verde Hacker */
+  --terminal-error: #ff3333;   /* Vermelho Erro */
   --folder-paper: #f4ecd8;
   --stamp-color: #722F37;
 }
 
-/* --- MODO INVESTIGAÇÃO (A TRANSFORMAÇÃO HACKER) --- */
+/* --- MODO INVESTIGAÇÃO --- */
 body.investigation-mode {
-  --bg-cream: #000000 !important; /* Fundo Preto */
-  --wine-red: #00ff41 !important; /* Texto vira Verde Neon */
+  --bg-cream: #050505 !important;
+  --wine-red: #00ff41 !important;
   --wine-light: #008F11 !important;
-  --military-green: #00ff41 !important; /* Tudo fica verde */
+  --military-green: #00ff41 !important;
   --text-primary: #00ff41 !important;
   --white: #000000 !important;
-  --folder-paper: #111111 !important; /* Pasta escura */
-  --stamp-color: #00ff41 !important; /* Carimbo neon */
+  --folder-paper: #111111 !important;
+  --stamp-color: #00ff41 !important;
 }
 
-/* Efeito nas imagens no modo investigação (Raio-X) */
 body.investigation-mode .p-image, 
 body.investigation-mode .card-image,
 body.investigation-mode .dossier-photo {
@@ -57,79 +57,140 @@ body, html, #root {
   font-family: 'Space Grotesk', sans-serif;
   overflow-x: hidden;
   scroll-behavior: smooth;
-  transition: background-color 1.5s ease, color 1s ease; /* Transição suave */
+  transition: background-color 1.5s ease, color 1s ease;
 }
 
-/* --- CARIMBO (LINHA ÚNICA) --- */
+/* --- EFEITO GLITCH NAS PISTAS --- */
+@keyframes glitch-anim {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+.clue-spot {
+  cursor: help !important;
+  display: inline-block;
+  position: relative;
+  transition: all 0.3s;
+  border-bottom: 1px dashed transparent;
+}
+
+.clue-spot:not(.found) {
+  animation: glitch-anim 2s infinite alternate-reverse;
+  color: var(--military-green);
+  font-weight: 500;
+}
+
+.clue-spot:not(.found):hover {
+  animation: none;
+  text-shadow: 2px 2px 0px rgba(114, 47, 55, 0.3);
+  letter-spacing: 2px;
+}
+
+.clue-spot.found {
+  color: var(--wine-red);
+  font-weight: bold;
+  animation: none;
+  border-bottom: 2px solid var(--wine-red);
+}
+
+.clue-feedback {
+  position: absolute;
+  top: -30px; left: 50%; transform: translateX(-50%);
+  font-size: 0.7rem; background: var(--wine-red); color: var(--bg-cream);
+  padding: 4px 8px; border-radius: 2px; pointer-events: none;
+  white-space: nowrap; animation: fadeUp 1s forwards;
+  font-family: 'Fira Code', monospace;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+  z-index: 100;
+}
+@keyframes fadeUp { 0% { opacity: 1; top: -30px; } 100% { opacity: 0; top: -50px; } }
+
+/* --- CARIMBO --- */
 .access-granted-stamp {
   position: fixed; top: 50%; left: 50%; 
   transform: translate(-50%, -50%) scale(3) rotate(-30deg);
   border: 6px solid var(--stamp-color); 
   color: var(--stamp-color); 
-  padding: 20px 40px; 
-  font-size: 2.5rem; /* Ajustado levemente para caber melhor em uma linha */
+  padding: 15px 30px; 
+  font-size: 2.5rem; 
   font-weight: 900;
   font-family: 'Space Grotesk', sans-serif; text-transform: uppercase; 
   opacity: 0; pointer-events: none; z-index: 10000;
-  background: rgba(0,0,0,0.1);
+  background: rgba(250, 249, 240, 0.95);
   backdrop-filter: blur(2px);
   text-align: center;
-  mix-blend-mode: hard-light;
-  white-space: nowrap; /* Garante que fique em uma linha */
+  mix-blend-mode: multiply;
+  white-space: nowrap;
   transition: all 0.5s;
 }
+body.investigation-mode .access-granted-stamp {
+  mix-blend-mode: normal;
+  background: rgba(0,0,0,0.8);
+  box-shadow: 0 0 30px var(--stamp-color);
+}
 .access-granted-stamp.visible { animation: stampIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-
 @keyframes stampIn { 
   100% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(-15deg); } 
 }
 
-/* --- DOSSIÊ (Adaptável aos dois modos) --- */
+/* --- EVIDENCE TRACKER --- */
+.evidence-tracker {
+  position: fixed; top: 30px; right: 30px; 
+  width: 200px;
+  background: rgba(255,255,255,0.5);
+  border: 1px solid var(--wine-red); 
+  z-index: 9900; backdrop-filter: blur(5px);
+  padding: 10px;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.et-label { font-family: 'Fira Code', monospace; font-size: 0.7rem; color: var(--wine-red); letter-spacing: 1px; display: flex; justify-content: space-between; }
+.et-bar-container { width: 100%; height: 6px; background: rgba(114, 47, 55, 0.1); border: 1px solid var(--wine-red); }
+.et-bar-fill { height: 100%; background: var(--wine-red); transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* --- DOSSIÊ --- */
 .dossier-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.8);
-  backdrop-filter: blur(5px);
-  z-index: 10000;
-  display: flex; align-items: center; justify-content: center;
+  background: rgba(114, 47, 55, 0.4); backdrop-filter: blur(5px);
+  z-index: 10000; display: flex; align-items: center; justify-content: center;
   animation: fadeIn 0.3s forwards;
+  padding: 20px;
 }
 .dossier-file {
-  width: 90%; max-width: 700px; background: var(--folder-paper);
-  padding: 40px; position: relative; color: var(--wine-red);
+  width: 100%; max-width: 700px; background: var(--folder-paper);
+  padding: 40px; position: relative; color: #333;
   font-family: 'Courier Prime', monospace;
-  box-shadow: 10px 10px 30px rgba(0,0,0,0.3);
-  transform: rotate(-1deg);
-  border: 2px solid var(--wine-red);
-  transition: all 0.5s;
+  box-shadow: 10px 10px 30px rgba(0,0,0,0.3); transform: rotate(-1deg);
+  border: 1px solid #d4c5a9; transition: all 0.5s;
+  max-height: 90vh; overflow-y: auto;
 }
-.dossier-header {
-  border-bottom: 2px solid var(--wine-red); margin-bottom: 20px; padding-bottom: 10px;
-  display: flex; justify-content: space-between; align-items: flex-end;
-}
-.dossier-stamp {
-  border: 3px solid var(--wine-red); color: var(--wine-red); padding: 5px 10px;
-  font-weight: bold; text-transform: uppercase; transform: rotate(-5deg);
-  font-size: 1rem; opacity: 0.8;
-}
+.dossier-header { border-bottom: 2px solid var(--wine-red); margin-bottom: 20px; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-end; }
+.dossier-stamp { border: 3px solid var(--wine-red); color: var(--wine-red); padding: 5px 10px; font-weight: bold; text-transform: uppercase; transform: rotate(-5deg); font-size: 1rem; opacity: 0.8; }
 .dossier-grid { display: flex; gap: 30px; }
-.dossier-photo {
-  width: 150px; height: 200px; background: #e0e0e0;
-  border: 5px solid var(--wine-red); 
-  object-fit: cover; filter: sepia(0.3) contrast(1.1);
-  transition: all 0.5s;
-}
-.dossier-info p { margin: 8px 0; font-size: 0.95rem; line-height: 1.4; }
-.dossier-info strong { text-transform: uppercase; font-weight: bold; margin-right: 10px; }
-.paper-clip {
-  position: absolute; top: -15px; right: 40px; width: 30px; height: 80px;
-  border: 4px solid #555; border-bottom: none; border-radius: 20px 20px 0 0;
-  z-index: 2;
-  opacity: 0.7;
-}
-.close-dossier {
-  position: absolute; top: 10px; right: 10px; cursor: pointer;
-  font-weight: bold; font-size: 1.2rem;
-}
+.dossier-photo { width: 150px; height: 200px; background: #e0e0e0; border: 5px solid #fff; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); object-fit: cover; filter: sepia(0.3) contrast(1.1); transition: all 0.5s; flex-shrink: 0; }
+.dossier-info p { margin: 8px 0; font-size: 0.95rem; line-height: 1.4; color: #444; }
+.dossier-info strong { text-transform: uppercase; font-weight: bold; margin-right: 10px; color: var(--wine-red); }
+.paper-clip { position: absolute; top: -15px; right: 40px; width: 30px; height: 80px; border: 4px solid #888; border-bottom: none; border-radius: 20px 20px 0 0; z-index: 2; opacity: 0.7; }
+.close-dossier { position: absolute; top: 10px; right: 10px; cursor: pointer; font-weight: bold; font-size: 1.2rem; color: var(--wine-red); }
+
+/* --- TERMINAL (COM BLOQUEIO) --- */
+.terminal-wrapper { position: fixed; bottom: 30px; right: 30px; z-index: 9990; display: flex; flex-direction: column; align-items: flex-end; }
+.terminal-toggle { width: 50px; height: 50px; background: var(--wine-red); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: transform 0.2s; color: #fff; font-size: 1.5rem; }
+.terminal-window { width: 400px; height: 300px; background: var(--terminal-bg); border: 1px solid var(--terminal-accent); border-radius: 4px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.8); margin-bottom: 15px; font-family: 'Fira Code', monospace; animation: slideUp 0.3s ease-out; }
+/* Se bloqueado, borda vermelha */
+.terminal-window.locked { border-color: var(--terminal-error); }
+.terminal-window.locked .terminal-body { color: var(--terminal-error); }
+.terminal-window.locked .terminal-input { color: var(--terminal-error); }
+
+.terminal-header { background: #111; padding: 5px 10px; font-size: 0.8rem; color: #666; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
+.terminal-body { flex: 1; padding: 15px; overflow-y: auto; color: var(--terminal-accent); font-size: 0.9rem; }
+.terminal-input-line { display: flex; align-items: center; margin-top: 10px; }
+.terminal-prompt { margin-right: 8px; color: #fff; }
+.terminal-input { background: transparent; border: none; color: var(--terminal-accent); font-family: 'Fira Code', monospace; flex: 1; outline: none; }
+.terminal-log { margin-bottom: 5px; line-height: 1.4; }
 
 /* --- CURSOR --- */
 .custom-cursor {
@@ -137,23 +198,19 @@ body, html, #root {
   background: var(--wine-red); border-radius: 50%; pointer-events: none;
   z-index: 10001; transform: translate(-50%, -50%);
   transition: width 0.3s, height 0.3s, background-color 0.5s;
-  mix-blend-mode: difference; /* Inversão no modo claro */
+  mix-blend-mode: multiply;
 }
-body.investigation-mode .custom-cursor {
-  mix-blend-mode: normal; /* Neon normal no modo escuro */
-  box-shadow: 0 0 10px var(--wine-red);
-}
-.custom-cursor.hovered { width: 80px; height: 80px; background: var(--bg-cream); border: 2px solid var(--wine-red); mix-blend-mode: normal; }
+body.investigation-mode .custom-cursor { mix-blend-mode: normal; box-shadow: 0 0 10px var(--wine-red); }
+.custom-cursor.hovered { width: 80px; height: 80px; background: rgba(114, 47, 55, 0.1); border: 1px solid var(--wine-red); mix-blend-mode: normal; }
 
 /* Decoração */
 .vertical-line { position: fixed; left: 40px; top: 0; bottom: 0; width: 1px; background-color: rgba(114, 47, 55, 0.2); z-index: 0; transition: 0.5s; }
 body.investigation-mode .vertical-line { background-color: rgba(0, 255, 65, 0.2); }
-
 .vertical-text { position: fixed; left: 10px; top: 50%; transform: translateY(-50%); writing-mode: vertical-rl; text-orientation: mixed; font-family: 'Noto Sans JP', sans-serif; color: var(--military-green); opacity: 0.6; letter-spacing: 0.5rem; font-size: 0.8rem; z-index: 1; transition: 0.5s; }
 .circle-bg { position: absolute; top: -10%; right: -10%; width: 600px; height: 600px; background-color: var(--wine-red); border-radius: 50%; opacity: 0.04; pointer-events: none; transition: 0.5s; }
 body.investigation-mode .circle-bg { opacity: 0.1; }
 
-/* Layout */
+/* Layout Geral */
 .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 2; }
 section { padding: 100px 0; border-bottom: 1px solid rgba(114,47,55,0.05); position: relative; transition: 0.5s; }
 body.investigation-mode section { border-bottom-color: rgba(0, 255, 65, 0.2); }
@@ -222,67 +279,48 @@ body.investigation-mode .t-desc { color: rgba(0, 255, 65, 0.8); }
 .form-line { width: 100%; padding: 15px 0; background: transparent; border: none; border-bottom: 2px solid var(--wine-red); font-family: 'Space Grotesk'; font-size: 1rem; margin-bottom: 20px; outline: none; transition: 0.3s; color: var(--wine-red); }
 .btn-send { background: var(--wine-red); color: white; border: none; padding: 15px 40px; font-size: 1rem; margin-top: 10px; font-family: 'Space Grotesk'; transition: 0.3s; }
 
-/* Terminal */
-.terminal-wrapper { position: fixed; bottom: 30px; right: 30px; z-index: 9990; display: flex; flex-direction: column; align-items: flex-end; }
-.terminal-toggle { width: 50px; height: 50px; background: var(--wine-red); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: transform 0.2s; color: #fff; font-size: 1.5rem; }
-.terminal-window { width: 400px; height: 300px; background: var(--terminal-bg); border: 1px solid var(--terminal-accent); border-radius: 4px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.8); margin-bottom: 15px; font-family: 'Fira Code', monospace; animation: slideUp 0.3s ease-out; }
-@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-.terminal-header { background: #111; padding: 5px 10px; font-size: 0.8rem; color: #666; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
-.terminal-body { flex: 1; padding: 15px; overflow-y: auto; color: var(--terminal-accent); font-size: 0.9rem; }
-.terminal-input-line { display: flex; align-items: center; margin-top: 10px; }
-.terminal-prompt { margin-right: 8px; color: #fff; }
-.terminal-input { background: transparent; border: none; color: var(--terminal-accent); font-family: 'Fira Code', monospace; flex: 1; outline: none; }
-.terminal-log { margin-bottom: 5px; line-height: 1.4; }
-
-/* --- PISTAS (CLUES) --- */
-.clue-spot {
-  cursor: help !important;
-  display: inline-block;
-  transition: all 0.3s;
-  position: relative;
-}
-.clue-spot:hover {
-  text-shadow: 0 0 8px var(--military-green);
-  color: var(--military-green);
-}
-.clue-spot.found {
-  color: var(--military-green);
-  font-weight: bold;
-}
-.clue-feedback {
-  position: absolute;
-  top: -20px; left: 50%; transform: translateX(-50%);
-  font-size: 0.7rem; background: var(--military-green); color: white;
-  padding: 2px 5px; border-radius: 4px; pointer-events: none;
-  white-space: nowrap; animation: fadeUp 1s forwards;
-}
-@keyframes fadeUp { 0% { opacity: 1; top: -20px; } 100% { opacity: 0; top: -40px; } }
-
-/* EVIDENCE TRACKER */
-.evidence-tracker {
-  position: fixed; top: 20px; right: 20px; 
-  border: 1px solid var(--wine-red); color: var(--wine-red);
-  padding: 10px 15px; font-family: 'Fira Code', monospace; font-size: 0.8rem;
-  z-index: 9900; backdrop-filter: blur(5px);
-}
-
+/* RESPONSIVIDADE (MOBILE) */
 @media (max-width: 768px) {
   * { cursor: auto !important; }
   .custom-cursor { display: none; }
+  .container { padding: 0 15px; }
+  .hero h1 { font-size: 3rem; }
   .tech-container { grid-template-columns: repeat(2, 1fr); }
-  .hero h1 { font-size: 3.5rem; }
-  .service-row { flex-direction: column; padding: 30px 0; }
-  .terminal-window { width: 90vw; right: 5vw; }
+  .service-row { flex-direction: column; padding: 30px 0; align-items: flex-start; }
+  .service-row:hover { padding-left: 10px; }
+  .service-arrow { display: none; }
+  .service-num { margin-bottom: 15px; display: block; }
   .dossier-grid { flex-direction: column; }
-  .dossier-photo { margin: 0 auto; }
+  .dossier-photo { margin: 0 auto 20px auto; }
+  .dossier-file { width: 95%; max-height: 80vh; overflow-y: scroll; }
+  .terminal-window { width: 100%; height: 50vh; }
+  .terminal-wrapper { bottom: 10px; right: 10px; left: 10px; width: auto; align-items: flex-end; }
+  .vertical-line, .vertical-text { display: none; }
+  .evidence-tracker { top: 10px; right: 10px; width: 150px; font-size: 0.7rem; }
+  .access-granted-stamp { font-size: 1.5rem; padding: 15px; width: 90%; white-space: normal; }
 }
 `;
+
+// --- COMPONENTE: SCRAMBLE TEXT ---
+const ScrambleText = ({ text, as: Component = 'span', className, style, onClick }) => {
+  const [display, setDisplay] = useState(text);
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
+  const scramble = () => {
+    let iter = 0;
+    const interval = setInterval(() => {
+      setDisplay(prev => text.split('').map((l, i) => i < iter ? text[i] : chars[Math.floor(Math.random() * chars.length)]).join(''));
+      if (iter >= text.length) clearInterval(interval);
+      iter += 1/3;
+    }, 30);
+  };
+  return <Component className={className} style={style} onMouseEnter={scramble} onClick={(e) => { scramble(); if(onClick) onClick(e); }}>{display}</Component>;
+};
 
 // --- COMPONENTE: CLUE SPOT ---
 const ClueSpot = ({ id, children, onFound, foundList }) => {
   const isFound = foundList.includes(id);
   const [showFeedback, setShowFeedback] = useState(false);
-  const handleHover = () => {
+  const handleInteraction = () => {
     if (!isFound) {
       onFound(id);
       setShowFeedback(true);
@@ -290,9 +328,9 @@ const ClueSpot = ({ id, children, onFound, foundList }) => {
     }
   };
   return (
-    <span className={`clue-spot ${isFound ? 'found' : ''}`} onMouseEnter={handleHover}>
+    <span className={`clue-spot ${isFound ? 'found' : ''}`} onMouseEnter={handleInteraction} onClick={handleInteraction}>
       {children}
-      {showFeedback && <div className="clue-feedback">PISTA ENCONTRADA!</div>}
+      {showFeedback && <div className="clue-feedback">EVIDÊNCIA #0{foundList.length + 1} DETECTADA</div>}
     </span>
   );
 };
@@ -340,7 +378,7 @@ const Dossier = ({ onClose }) => {
             <div className="dossier-stamp">CLASSIFIED</div>
          </div>
          <div className="dossier-grid">
-            <img src="https://lh3.googleusercontent.com/a/ACg8ocK4BnCJ0_Zs74-55HgYJ_khUZmagwpdeGRyoMIAWZ6Z0vA_juSs9g=s360-c-no" alt="Suspeito" className="dossier-photo"/>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png" alt="Suspeito" className="dossier-photo"/>
             <div className="dossier-info">
               <p><strong>Nome:</strong> Rafael Carneiro</p>
               <p><strong>Idade:</strong> 23 Anos</p>
@@ -420,15 +458,29 @@ const Typewriter = ({ text, delay = 100 }) => {
   return <span className="typewriter">{currentText}</span>;
 };
 
-// --- COMPONENTE TERMINAL ---
+// --- COMPONENTE TERMINAL (COM TRAVA DE SEGURANÇA) ---
 const Terminal = ({ solved, onOpenDossier }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
-  const [logs, setLogs] = useState(["Bem-vindo ao Rafael_OS v2.0", "Digite 'help' para iniciar."]);
+  const [logs, setLogs] = useState([]);
   const endRef = useRef(null);
 
+  // Atualiza os logs dependendo se está desbloqueado ou não
   useEffect(() => {
-    if (solved) setLogs(prev => [...prev, ">>> MODO INVESTIGAÇÃO ATIVO. ACESSO TOTAL CONCEDIDO."]);
+    if (solved) {
+      setLogs([
+        "PROTOCOL: MATRIX... [OK]", 
+        "ACCESS: GRANTED.", 
+        "Bem-vindo ao Rafael_OS v2.0", 
+        "Digite 'help' para iniciar."
+      ]);
+    } else {
+      setLogs([
+        "*** ALERTA DE SEGURANÇA ***",
+        "Acesso negado. Sistema criptografado.",
+        "Localize as 3 evidências para desbloquear."
+      ]);
+    }
   }, [solved]);
 
   const handleCommand = (e) => {
@@ -442,10 +494,13 @@ const Terminal = ({ solved, onOpenDossier }) => {
           setTimeout(onOpenDossier, 800);
           break;
         case 'investigation': 
-          response = solved ? "Acesso autorizado. Protocolo Matrix ativado." : "Acesso negado. Encontre as 3 pistas."; 
+          response = "Acesso autorizado. Protocolo Matrix ativado."; 
           break;
         case 'contact': response = "Email: rflgccontato@gmail.com"; break;
-        case 'clear': setLogs([]); setInput(''); return;
+        case 'clear': 
+           setLogs(["Bem-vindo ao Rafael_OS v2.0", "Digite 'help' para iniciar."]); 
+           setInput(''); 
+           return;
         default: response = `Comando desconhecido: ${cmd}`;
       }
       setLogs([...logs, `> ${input}`, response]);
@@ -457,11 +512,24 @@ const Terminal = ({ solved, onOpenDossier }) => {
   return (
     <div className="terminal-wrapper">
       {isOpen && (
-        <div className="terminal-window">
-           <div className="terminal-header"><span>{solved ? 'admin' : 'guest'}@rafael-portfolio:~</span><span style={{cursor:'pointer'}} onClick={() => setIsOpen(false)}>_</span></div>
+        <div className={`terminal-window ${!solved ? 'locked' : ''}`}>
+           <div className="terminal-header">
+              <span>{solved ? 'admin' : 'guest'}@rafael-portfolio:~</span>
+              <span style={{cursor:'pointer'}} onClick={() => setIsOpen(false)}>_</span>
+           </div>
            <div className="terminal-body">
               {logs.map((log, i) => <div key={i} className="terminal-log">{log}</div>)}
-              <div className="terminal-input-line"><span className="terminal-prompt">$</span><input className="terminal-input" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleCommand} autoFocus /></div>
+              <div className="terminal-input-line">
+                 <span className="terminal-prompt">$</span>
+                 <input 
+                   className="terminal-input" 
+                   value={solved ? input : "BLOQUEADO"} 
+                   onChange={(e) => setInput(e.target.value)} 
+                   onKeyDown={handleCommand} 
+                   autoFocus 
+                   disabled={!solved}
+                 />
+              </div>
               <div ref={endRef} />
            </div>
         </div>
@@ -543,7 +611,10 @@ function App() {
       {showDossier && <Dossier onClose={() => setShowDossier(false)} />}
 
       <div className="evidence-tracker">
-          EVIDÊNCIAS: {foundClues.length}/3 {isSolved ? '[ACESSO TOTAL]' : ''}
+          <div className="et-label"><span>DECRIPTAÇÃO</span> <span>{foundClues.length}/3</span></div>
+          <div className="et-bar-container">
+             <div className="et-bar-fill" style={{width: `${(foundClues.length / 3) * 100}%`}}></div>
+          </div>
       </div>
 
       <div className="App">
@@ -551,7 +622,7 @@ function App() {
 
         <div className="vertical-line"></div>
         <div className="vertical-text">
-            ラファエル // <ClueSpot id="clue-date" onFound={handleClueFound} foundList={foundClues}>2025</ClueSpot>
+            ラファエル // 2026
         </div>
         
         {/* HERO */}
@@ -564,7 +635,8 @@ function App() {
           <HoverScale>
             <h1>
                 <span className="hero-jp-name">ラファエル・カルネイロ</span>
-                RAFAEL<ClueSpot id="clue-dot" onFound={handleClueFound} foundList={foundClues}>.</ClueSpot><br/>
+                <ScrambleText text="RAFAEL" />
+                <ClueSpot id="clue-dot" onFound={handleClueFound} foundList={foundClues}>.</ClueSpot><br/>
             </h1>
           </HoverScale>
           <div style={{minHeight: '60px'}}>
@@ -577,7 +649,7 @@ function App() {
           <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '60px'}}>
              <div>
                 <HoverScale>
-                  <h2 style={{fontSize: '2rem'}}>SOBRE <span style={{fontSize:'1rem', fontFamily:'Noto Sans JP'}}>私について</span></h2>
+                  <h2 style={{fontSize: '2rem'}}><ScrambleText text="SOBRE" /> <span style={{fontSize:'1rem', fontFamily:'Noto Sans JP'}}>私について</span></h2>
                 </HoverScale>
                 <p style={{marginTop: '20px', color: '#444'}}>
                    Me chamo <strong>Rafael Carneiro</strong>. Minha trajetória é marcada pela análise: comecei na <ClueSpot id="clue-crimino" onFound={handleClueFound} foundList={foundClues}>Criminologia</ClueSpot> e hoje aplico essa visão crítica no desenvolvimento de software.
@@ -588,7 +660,7 @@ function App() {
              </div>
              
              <div>
-                <h3 style={{color: '#556B2F', marginBottom: '20px'}}>TECH STACK</h3>
+                <h3 style={{color: '#556B2F', marginBottom: '20px'}}><ScrambleText text="TECH STACK" /></h3>
                 <div className="tech-container">
                    {techList.map(tech => <TechBadge key={tech} name={tech} />)}
                 </div>
@@ -598,7 +670,7 @@ function App() {
 
         {/* SERVIÇOS */}
         <section className="container">
-           <h2 style={{textAlign: 'right', marginBottom: '40px'}}>SERVIÇOS <span style={{fontSize:'1rem', fontFamily:'Noto Sans JP'}}>サービス</span></h2>
+           <h2 style={{textAlign: 'right', marginBottom: '40px'}}><ScrambleText text="SERVIÇOS" /> <span style={{fontSize:'1rem', fontFamily:'Noto Sans JP'}}>サービス</span></h2>
            <div className="services-list">
               {servicesList.map((service) => (
                 <div className="service-row" key={service.id}>
@@ -616,7 +688,7 @@ function App() {
         {/* PROJETOS */}
         <section className="container" style={{paddingBottom: '120px'}}>
           <h2 style={{fontSize: '2rem', marginBottom: '50px', borderBottom: '2px solid #722F37', display: 'inline-block'}}>
-              PROJETOS <span style={{fontSize:'1rem', fontFamily:'Noto Sans JP'}}>プロジェクト</span>
+              <ScrambleText text="PROJETOS" /> <span style={{fontSize:'1rem', fontFamily:'Noto Sans JP'}}>プロジェクト</span>
           </h2>
           <div className="projects-grid">
             {projects.map((project, idx) => (
@@ -643,7 +715,7 @@ function App() {
         {/* TIMELINE */}
         <section className="container">
            <div style={{maxWidth: '800px', margin: '0 auto'}}>
-              <h2 style={{fontSize: '2rem', marginBottom: '20px'}}>TRAJETÓRIA <span style={{fontSize:'1rem', fontFamily:'Noto Sans JP'}}>キャリア</span></h2>
+              <h2 style={{fontSize: '2rem', marginBottom: '20px'}}><ScrambleText text="TRAJETÓRIA" /> <span style={{fontSize:'1rem', fontFamily:'Noto Sans JP'}}>キャリア</span></h2>
               <div className="timeline-container">
                  <div className="timeline-line"></div>
                  {timelineData.map((item, index) => (
@@ -661,7 +733,11 @@ function App() {
         {/* CONTATO */}
         <section className="container contact-section">
            <div style={{maxWidth: '600px', margin: '0 auto'}}>
-              <h2 style={{textAlign: 'center', marginBottom: '30px'}}>VAMOS CONVERSAR?</h2>
+              <h2 style={{textAlign: 'center', marginBottom: '30px'}}>
+                 <ClueSpot id="clue-contact" onFound={handleClueFound} foundList={foundClues}>
+                    <ScrambleText text="VAMOS CONVERSAR?" />
+                 </ClueSpot>
+              </h2>
               <form onSubmit={(e) => e.preventDefault()}>
                  <input type="text" className="form-line" placeholder="Seu Nome" />
                  <input type="email" className="form-line" placeholder="Seu Email" />
@@ -682,7 +758,9 @@ function App() {
               <a href="#" style={{color: '#722F37'}}>GitHub</a>
               <a href="mailto:rflgccontato@gmail.com" style={{color: '#722F37'}}>Email</a>
             </div>
-            <p style={{opacity: 0.5, fontSize: '0.8rem'}}>© 2025 Rafael.dev</p>
+            <p style={{opacity: 0.5, fontSize: '0.8rem'}}>
+               © 2025 Rafael.dev
+            </p>
           </div>
         </footer>
       </div>

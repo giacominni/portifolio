@@ -1,0 +1,222 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Noto+Sans+JP:wght@100;400;700&display=swap');
+
+/* --- RESET & BASICS (Para garantir que funcione) --- */
+:root {
+  --bg-cream: #FFFDD0;
+  --wine-red: #722F37;
+  --wine-light: #9c404b;
+  --military-green: #556B2F;
+  --text-primary: #722F37;
+  --white: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body, html, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--bg-cream) !important; /* !important força a cor */
+  color: var(--text-primary);
+  font-family: 'Space Grotesk', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Tipografia Japonesa Auxiliar */
+.jp-font {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-weight: 400;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  position: relative;
+  z-index: 2;
+}
+
+/* --- DECORAÇÃO JAPONESA --- */
+.vertical-line {
+  position: fixed;
+  left: 40px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: rgba(114, 47, 55, 0.2);
+  z-index: 0;
+}
+
+.vertical-text {
+  position: fixed;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-family: 'Noto Sans JP', sans-serif;
+  letter-spacing: 0.5rem;
+  color: var(--military-green);
+  opacity: 0.6;
+  font-size: 0.8rem;
+  z-index: 1;
+}
+
+.circle-bg {
+  position: absolute;
+  top: -10%;
+  right: -10%;
+  width: 600px;
+  height: 600px;
+  background-color: var(--wine-red);
+  border-radius: 50%;
+  opacity: 0.03; /* Bem sutil no fundo */
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* --- HERO SECTION --- */
+.hero {
+  min-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+.greeting-wrapper {
+  font-size: 1.5rem;
+  color: var(--military-green);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hero h1 {
+  font-size: 6rem;
+  line-height: 0.9;
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: -3px;
+  position: relative;
+}
+
+.hero-jp-name {
+  position: absolute;
+  top: -20px;
+  left: 5px;
+  font-size: 1rem;
+  color: var(--wine-light);
+  font-family: 'Noto Sans JP';
+  letter-spacing: 5px;
+}
+
+/* Cursor Piscando */
+.typewriter {
+  font-size: 2rem;
+  margin-top: 20px;
+  color: var(--wine-light);
+  border-right: 3px solid var(--wine-red);
+  padding-right: 10px;
+  display: inline-block;
+  animation: blinkCursor 0.8s step-end infinite;
+}
+
+@keyframes blinkCursor {
+  50% { border-color: transparent; }
+}
+
+/* --- CARDS & GRID --- */
+.section-title {
+  font-size: 3rem;
+  position: relative;
+  display: inline-block;
+  margin-bottom: 60px;
+}
+
+.section-subtitle-jp {
+  position: absolute;
+  top: -15px;
+  left: 0;
+  font-size: 0.9rem;
+  color: var(--military-green);
+  font-family: 'Noto Sans JP';
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 40px;
+  perspective: 1000px;
+}
+
+.card {
+  background: var(--white);
+  border: 1px solid rgba(114, 47, 55, 0.1);
+  padding: 10px; /* Borda branca interna estilo polaroid/moldura */
+  box-shadow: 10px 10px 0px rgba(85, 107, 47, 0.1); /* Sombra sólida estilo retro */
+  transition: transform 0.1s ease;
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+.card-image {
+  height: 220px;
+  background-color: #eee;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-image::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: var(--wine-red);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.card:hover .card-image::after {
+  opacity: 0.2; /* Tint vermelho ao passar o mouse */
+}
+
+.card-content {
+  padding: 20px 10px;
+}
+
+.card h3 {
+  margin: 0;
+  font-size: 1.4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.jp-tag {
+  font-size: 0.7rem;
+  background: var(--wine-red);
+  color: var(--bg-cream);
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+/* --- FOOTER --- */
+footer {
+  border-top: 1px solid var(--wine-red);
+  padding: 80px 0;
+  text-align: center;
+  margin-top: 100px;
+}
+
+@media (max-width: 768px) {
+  .hero h1 { font-size: 3.5rem; }
+  .vertical-text, .vertical-line { display: none; } /* Esconde no mobile */
+  .circle-bg { width: 300px; height: 300px; }
+}

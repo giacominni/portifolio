@@ -378,7 +378,7 @@ const Dossier = ({ onClose }) => {
             <div className="dossier-stamp">CLASSIFIED</div>
          </div>
          <div className="dossier-grid">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png" alt="Suspeito" className="dossier-photo"/>
+            <img src="https://lh3.googleusercontent.com/a/ACg8ocK4BnCJ0_Zs74-55HgYJ_khUZmagwpdeGRyoMIAWZ6Z0vA_juSs9g=s360-c-no" alt="Suspeito" className="dossier-photo"/>
             <div className="dossier-info">
               <p><strong>Nome:</strong> Rafael Carneiro</p>
               <p><strong>Idade:</strong> 23 Anos</p>

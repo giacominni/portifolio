@@ -579,8 +579,9 @@ function App() {
 
   const projects = [
     { title: "ProtecGera", jp: "保護システム", desc: "Solução completa para serviços de geradores. Design focado em conversão.", tags: ["React", "SEO"], image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80", link: "https://protecgera.com.br" },
-    { title: "E-commerce", jp: "電子商取引", desc: "Plataforma de vendas robusta com dashboard administrativo.", tags: ["React", "Node"], image: "https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?auto=format&fit=crop&w=800&q=80", link: "#" },
-    { title: "App Financeiro", jp: "金融アプリ", desc: "Sistema de controle financeiro com gráficos interativos.", tags: ["Vue", "Firebase"], image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80", link: "#" }
+    { title: "Landing Page para Social Media", jp: "電子商取引", desc: "Desenvolvimento de uma landing page com o objetivo de centralizar informações essenciais da rotina de social media. A página foi estruturada para facilitar o acesso rápido a links importantes, diretrizes de conteúdo e materiais de apoio, otimizando a organização e a produtividade no dia a dia.
+", tags: ["React", "Node"], image: "https://formulario-six-xi.vercel.app/Ilustrac%CC%A7a%CC%83o_Sem_Ti%CC%81tulo%201.png", link: "https://formulario-six-xi.vercel.app/" },
+    { title: "App Financeiro", jp: "金融アプリ", desc: "Sistema de controle financeiro com gráficos interativos.", tags: ["Vue", "Firebase"], image: "https://i.imgur.com/o0guQM5.png", link: "https://sulmidiadash.vercel.app/" }
   ];
 
   const servicesList = [

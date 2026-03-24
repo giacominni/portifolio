@@ -1,66 +1,275 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Noto+Sans+JP:wght@100;400;700&display=swap');
 
+/* ============================================================
+   TOKENS — variáveis globais
+   ============================================================ */
 :root {
-  --bg-cream: #FFFDD0;
-  --wine-red: #722F37;
+  --bg-cream:       #FFFDD0;
+  --wine-red:       #722F37;
+  --wine-light:     #9c404b;
   --military-green: #556B2F;
-  --white: #ffffff;
+  --text-primary:   #722F37;
+  --white:          #ffffff;
+
+  --shadow-card:    10px 10px 0px rgba(85, 107, 47, 0.1);
+  --border-subtle:  1px solid rgba(114, 47, 55, 0.1);
+  --transition-base: 0.3s ease;
 }
 
-/* RESET TOTAL */
-* {
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-body {
+body,
+html,
+#root {
   margin: 0;
   padding: 0;
-  background-color: var(--bg-cream) !important; /* Forçando a cor creme */
-  color: var(--wine-red);
-  font-family: 'Space Grotesk', sans-serif;
+  width: 100%;
   min-height: 100vh;
+  background-color: var(--bg-cream);
+  color: var(--text-primary);
+  font-family: 'Space Grotesk', sans-serif;
+  overflow-x: hidden;
 }
 
-/* SE NÃO ESTIVER CREME, O PROBLEMA É AQUI */
-html, #root {
-  background-color: var(--bg-cream) !important;
-  height: 100%;
+/* ============================================================
+   TIPOGRAFIA
+   ============================================================ */
+.jp-font {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-weight: 400;
 }
 
-/* Decoração */
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  position: relative;
+  z-index: 2;
+}
+
+/* ============================================================
+   DECORAÇÃO — linha vertical + texto rotacionado
+   ============================================================ */
 .vertical-line {
-  position: fixed; left: 40px; top: 0; bottom: 0; width: 1px;
+  position: fixed;
+  left: 40px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
   background-color: rgba(114, 47, 55, 0.2);
+  z-index: 0;
 }
 
 .vertical-text {
-  position: fixed; left: 10px; top: 50%; transform: translateY(-50%);
-  writing-mode: vertical-rl; text-orientation: mixed;
-  font-family: 'Noto Sans JP', sans-serif; color: var(--military-green);
-  opacity: 0.6; letter-spacing: 0.5rem;
+  position: fixed;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-family: 'Noto Sans JP', sans-serif;
+  letter-spacing: 0.5rem;
+  color: var(--military-green);
+  opacity: 0.6;
+  font-size: 0.8rem;
+  z-index: 1;
 }
 
-.container {
-  max-width: 1200px; margin: 0 auto; padding: 0 20px;
+.circle-bg {
+  position: absolute;
+  top: -10%;
+  right: -10%;
+  width: 600px;
+  height: 600px;
+  background-color: var(--wine-red);
+  border-radius: 50%;
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 0;
 }
 
-/* Hero */
-.hero { min-height: 90vh; display: flex; flex-direction: column; justify-content: center; }
-.hero h1 { font-size: 5rem; line-height: 1; margin: 0; font-weight: 700; }
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero {
+  min-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
 
+.greeting-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--military-green);
+  margin-bottom: 0.5rem;
+}
+
+.hero h1 {
+  position: relative;
+  margin: 0;
+  font-size: 6rem;
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: -3px;
+}
+
+.hero-jp-name {
+  position: absolute;
+  top: -20px;
+  left: 5px;
+  font-size: 1rem;
+  font-family: 'Noto Sans JP', sans-serif;
+  letter-spacing: 5px;
+  color: var(--wine-light);
+}
+
+/* ============================================================
+   TYPEWRITER
+   ============================================================ */
 .typewriter {
-  font-size: 2rem; color: var(--military-green); border-right: 3px solid var(--wine-red);
-  padding-right: 10px; animation: blink 1s infinite;
+  display: inline-block;
+  margin-top: 20px;
+  font-size: 2rem;
+  color: var(--wine-light);
+  border-right: 3px solid var(--wine-red);
+  padding-right: 10px;
+  animation: blinkCursor 0.8s step-end infinite;
 }
-@keyframes blink { 50% { border-color: transparent; } }
 
-/* Cards */
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; margin-top: 60px; }
+@keyframes blinkCursor {
+  50% { border-color: transparent; }
+}
+
+/* ============================================================
+   SEÇÕES — título + subtítulo japonês
+   ============================================================ */
+.section-title {
+  position: relative;
+  display: inline-block;
+  font-size: 3rem;
+  margin-bottom: 60px;
+}
+
+.section-subtitle-jp {
+  position: absolute;
+  top: -15px;
+  left: 0;
+  font-size: 0.9rem;
+  font-family: 'Noto Sans JP', sans-serif;
+  color: var(--military-green);
+}
+
+/* ============================================================
+   GRID & CARDS
+   ============================================================ */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 40px;
+  perspective: 1000px;
+}
 
 .card {
-  background: white; padding: 15px; border: 1px solid var(--wine-red);
-  box-shadow: 10px 10px 0 rgba(85, 107, 47, 0.2); transition: 0.2s;
+  background: var(--white);
+  border: var(--border-subtle);
+  padding: 10px;
+  box-shadow: var(--shadow-card);
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease, box-shadow var(--transition-base);
+  cursor: pointer;
 }
-.card:hover { transform: translateY(-5px); box-shadow: 15px 15px 0 rgba(85, 107, 47, 0.4); }
 
-.card-image { height: 200px; background-color: #ddd; background-size: cover; margin-bottom: 15px; }
+.card:hover {
+  box-shadow: 14px 14px 0px rgba(85, 107, 47, 0.15);
+}
+
+.card-image {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+  background-color: #eee;
+  background-size: cover;
+  background-position: center;
+}
+
+.card-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--wine-red);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.card:hover .card-image::after {
+  opacity: 0.2;
+}
+
+.card-content {
+  padding: 20px 10px;
+}
+
+.card h3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.jp-tag {
+  padding: 2px 6px;
+  font-size: 0.7rem;
+  border-radius: 2px;
+  background: var(--wine-red);
+  color: var(--bg-cream);
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer {
+  margin-top: 100px;
+  padding: 80px 0;
+  border-top: 1px solid var(--wine-red);
+  text-align: center;
+}
+
+/* ============================================================
+   RESPONSIVIDADE
+   ============================================================ */
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 3.5rem;
+    letter-spacing: -1px;
+  }
+
+  .vertical-line,
+  .vertical-text {
+    display: none;
+  }
+
+  .circle-bg {
+    width: 300px;
+    height: 300px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
